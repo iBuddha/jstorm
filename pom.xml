@@ -152,7 +152,7 @@
     <module>jstorm-ui</module>
     <!--<module>jstorm-utility/jstorm-rocket-mq</module>-->
     <module>jstorm-utility/jstorm-kafka</module>
-    <module>jstorm-utility/ons</module>
+    <!--<module>jstorm-utility/ons</module>-->
     <module>jstorm-utility/jstorm-flux</module>
     <module>jstorm-utility/jstorm-elasticsearch</module>
     <module>jstorm-on-yarn</module>
@@ -265,39 +265,39 @@
   </distributionManagement>
 -->
 
-  <repositories>
-    <repository>
-      <id>nexus</id>
-      <name>local private nexus</name>
-      <url>http://maven.oschina.net/content/groups/public/</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>taobao</id>
-      <url>http://mvnrepo.code.taobao.org/nexus/content/repositories/releases/</url>
-    </repository>
-    <repository>
-      <id>twitter4j</id>
-      <url>http://twitter4j.org/maven2</url>
-    </repository>
-    <repository>
-      <id>central</id>
-      <url>http://repo1.maven.org/maven2</url>
-    </repository>
-    <repository>
-      <id>clojars</id>
-      <url>http://clojars.org/repo/</url>
-    </repository>
-    <repository>
-      <id>C</id>
-      <url>http://repository.sonatype.org/content/groups/public/</url>
-    </repository>
-  </repositories>
+  <!--<repositories>-->
+    <!--<repository>-->
+      <!--<id>nexus</id>-->
+      <!--<name>local private nexus</name>-->
+      <!--<url>http://maven.oschina.net/content/groups/public/</url>-->
+      <!--<releases>-->
+        <!--<enabled>true</enabled>-->
+      <!--</releases>-->
+      <!--<snapshots>-->
+        <!--<enabled>false</enabled>-->
+      <!--</snapshots>-->
+    <!--</repository>-->
+    <!--<repository>-->
+      <!--<id>taobao</id>-->
+      <!--<url>http://mvnrepo.code.taobao.org/nexus/content/repositories/releases/</url>-->
+    <!--</repository>-->
+    <!--<repository>-->
+      <!--<id>twitter4j</id>-->
+      <!--<url>http://twitter4j.org/maven2</url>-->
+    <!--</repository>-->
+    <!--<repository>-->
+      <!--<id>central</id>-->
+      <!--<url>http://repo1.maven.org/maven2</url>-->
+    <!--</repository>-->
+    <!--<repository>-->
+      <!--<id>clojars</id>-->
+      <!--<url>http://clojars.org/repo/</url>-->
+    <!--</repository>-->
+    <!--<repository>-->
+      <!--<id>C</id>-->
+      <!--<url>http://repository.sonatype.org/content/groups/public/</url>-->
+    <!--</repository>-->
+  <!--</repositories>-->
 
   <build>
     <pluginManagement>
