@@ -11,6 +11,8 @@ export PATH=$PYTHON_HOME/bin:$JSTORM_HOME/bin:$HADOOP_HOME/bin:$JAVA_HOME/bin:$P
 rm -rf deploy
 #hadoop fs -get $3 $8/deploy
 hadoop fs -get $3 deploy
+echo $3
+echo $8
 
 echo -e " storm.local.dir: "$2/data" \n" >> deploy/jstorm/conf/storm.yaml
 

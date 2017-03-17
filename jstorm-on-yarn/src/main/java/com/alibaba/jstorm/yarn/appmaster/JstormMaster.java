@@ -969,7 +969,9 @@ public class JstormMaster {
             try {
                 slotPortsStr = slotPortsView.getSupervisorSlotPorts(container.getResource().getMemory(),
                         container.getResource().getVirtualCores(), container.getNodeId().getHost());
-
+                if(slotPortsStr.isEmpty()){
+                    slotPortsStr = "*"; // to see what will happen
+                }
                 vargs.add(slotPortsStr);
             } catch (Exception ex) {
                 LOG.error("failed get slot ports , container " + container.toString() + "launch fail", ex);
@@ -982,6 +984,8 @@ public class JstormMaster {
                         JOYConstants.DEFAULT_SUPERVISOR_VCORES, container.getNodeId().getHost());
                 nimbusThriftPort = slotPortsView.getSupervisorSlotPorts(JOYConstants.DEFAULT_SUPERVISOR_MEMORY,
                         JOYConstants.DEFAULT_SUPERVISOR_VCORES, container.getNodeId().getHost());
+                nimbusThriftPort = nimbusThriftPort.split(JOYConstants.COMMA)[0]; //or it will be a list, rather a single port
+                logviewPort = logviewPort.split(JOYConstants.COMMA)[0];// same as above
             } catch (Exception e) {
                 e.printStackTrace();
             }

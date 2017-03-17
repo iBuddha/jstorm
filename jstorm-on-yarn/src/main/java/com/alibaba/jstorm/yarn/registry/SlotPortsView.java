@@ -53,6 +53,9 @@ public class SlotPortsView {
         String containerPath = RegistryUtils.componentPath(
                 JOYConstants.APP_TYPE, instanceName, containerId.getApplicationAttemptId().getApplicationId().toString(), containerId.toString());
 
+        LOG.info("appPath %s, path %s, containerPath %s".format(appPath, path, containerPath));
+        LOG.info("supervisorHost %s, slotCount %d".format(supervisorHost, slotCount));
+
         List<String> reList = new ArrayList<String>();
         try {
 
@@ -61,6 +64,8 @@ public class SlotPortsView {
 
 
             List<String> instanceNames = registryOperations.list(appPath);
+            LOG.info("instanceNames length " + instanceNames.size());
+
             for (String instance : instanceNames) {
 
                 String servicePath = RegistryUtils.serviceclassPath(
@@ -97,8 +102,11 @@ public class SlotPortsView {
             //scan port range from 9000 to 15000
             for (int i = getMinPort(); i < getMaxPort(); i++) {
                 if (JstormYarnUtils.isPortAvailable(supervisorHost, i)) {
-                    if (!hostUsedPorts.contains(String.valueOf(i)))
+                    LOG.info("port " + i + "is available.");
+                    if (!hostUsedPorts.contains(String.valueOf(i))) {
                         reList.add(String.valueOf(i));
+                        LOG.info("add " + i + "to reList");
+                    }
                 }
                 if (reList.size() >= slotCount) {
                     break;

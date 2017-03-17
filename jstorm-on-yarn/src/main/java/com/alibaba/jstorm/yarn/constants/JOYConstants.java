@@ -165,7 +165,7 @@ public class JOYConstants {
     public static final String RPC = "rpc";
     public static final Integer SLEEP_INTERVAL = 1000;
     public static final Integer RETRY_TIMES = 45;
-    public static final Double JSTORM_MEMORY_WEIGHT = 4096.0;
+    public static final Double JSTORM_MEMORY_WEIGHT = 1024.0;
     public static final Double JSTORM_VCORE_WEIGHT = 1.2;
 
     /**

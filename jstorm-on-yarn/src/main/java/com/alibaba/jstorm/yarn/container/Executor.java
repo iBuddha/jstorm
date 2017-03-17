@@ -229,6 +229,8 @@ public class Executor {
             LOG.info("start process");
             //set system env
             LOG.info(JOYConstants.CONTAINER_SUPERVISOR_HEARTBEAT + JOYConstants.EQUAL + executorMeta.getLocalDir() + JOYConstants.JSTORM_SUPERVISOR_HEARTBEAT_PATH);
+            System.out.println("command:");
+            System.out.println(command.toString());
             Process p = Runtime.getRuntime().exec(command.toString(),
                     new String[]{JOYConstants.CONTAINER_SUPERVISOR_HEARTBEAT + JOYConstants.EQUAL + executorMeta.getLocalDir() + JOYConstants.JSTORM_SUPERVISOR_HEARTBEAT_PATH,
                             JOYConstants.CONTAINER_NIMBUS_HEARTBEAT + JOYConstants.EQUAL + executorMeta.getLocalDir() + JOYConstants.JSTORM_NIMBUS_HEARTBEAT_PATH});
