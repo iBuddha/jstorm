@@ -49,6 +49,7 @@ public class LocalFsBlobStoreFile extends BlobStoreFile {
     }
 
     public LocalFsBlobStoreFile(File base, boolean isTmp, boolean mustBeNew) {
+        LOG.info("create blobstore file, location: " + base.getAbsolutePath());
         _key = base.getName();
         _isTmp = isTmp;
         _mustBeNew = mustBeNew;

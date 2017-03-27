@@ -99,6 +99,7 @@ public class LocalFsBlobStore extends BlobStore {
             mOut = null;
             return new BlobStoreFileOutputStream(fbs.write(DATA_PREFIX + key, true));
         } catch (IOException e) {
+            LOG.info("IOException in BlobStore for key: " + key, e);
             throw new RuntimeException(e);
         } finally {
             if (mOut != null) {

@@ -19,9 +19,8 @@ package com.alibaba.jstorm.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.net.Socket;
+import java.util.*;
 import java.util.concurrent.Future;
 
 import backtype.storm.generated.KeyNotFoundException;
@@ -49,6 +48,40 @@ import com.alibaba.jstorm.cluster.StormConfig;
 public class JStormServerUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(JStormServerUtils.class);
+
+    public static boolean isPortAvailable(String host, int port) {
+        try {
+            Socket socket = new Socket(host, port);
+            socket.close();
+            return false;
+        } catch (IOException e) {
+            return true;
+        }
+    }
+
+    public static void replaceUnavilablePorts(String host, Set<Integer> ports, int minPort) {
+        List<Integer> portUsedByOtherApplications = new ArrayList<>();
+        for(int port : ports) {
+            boolean isAvailable =isPortAvailable(host, port);
+            if(!isAvailable) {
+                portUsedByOtherApplications.add(port);
+            }
+        }
+
+        if(portUsedByOtherApplications.size() > 0) {
+            ports.removeAll(portUsedByOtherApplications);
+            //find min port
+            //find next available port
+            int mkupPortNum = portUsedByOtherApplications.size();
+            while(mkupPortNum > 0){
+                if(isPortAvailable(host, minPort)){
+                    ports.add(minPort);
+                    mkupPortNum --;
+                }
+                minPort ++;
+            }
+        }
+    }
 
     public static void downloadCodeFromBlobStore(Map conf, String localRoot, String topologyId)
             throws IOException, KeyNotFoundException {

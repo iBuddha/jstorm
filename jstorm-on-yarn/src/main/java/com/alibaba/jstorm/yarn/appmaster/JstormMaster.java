@@ -19,6 +19,7 @@ import com.alibaba.jstorm.yarn.constants.JOYConstants;
 import com.alibaba.jstorm.yarn.Log4jPropertyHelper;
 import com.alibaba.jstorm.yarn.container.ExecutorLoader;
 import com.alibaba.jstorm.yarn.context.JstormMasterContext;
+import com.alibaba.jstorm.yarn.handler.JstormAMHandler;
 import com.alibaba.jstorm.yarn.model.DSEntity;
 import com.alibaba.jstorm.yarn.model.DSEvent;
 import com.alibaba.jstorm.yarn.model.STARTType;
@@ -109,6 +110,8 @@ public class JstormMaster {
     @VisibleForTesting
     TimelineClient timelineClient;
     private PortScanner portScanner;
+
+    private JstormAMHandler amHandler;
     /**
      * The YARN registry service
      */
@@ -399,6 +402,7 @@ public class JstormMaster {
             LOG.info("register path: " + instancePath);
             AMServer as = new AMServer(jstormMasterContext.appMasterThriftPort);
             as.Start(this);
+            amHandler = as.handler;
         }
     }
 
@@ -557,11 +561,13 @@ public class JstormMaster {
 
                 // increment counters for completed/failed containers
                 int exitStatus = containerStatus.getExitStatus();
+                boolean needRestart = false;
+                jstormMasterContext.numCompletedContainers.incrementAndGet();
                 if (JOYConstants.EXIT_SUCCESS != exitStatus) {
                     // container failed
                     if (ContainerExitStatus.ABORTED != exitStatus) {
-                        jstormMasterContext.numCompletedContainers.incrementAndGet();
                         jstormMasterContext.numFailedContainers.incrementAndGet();
+                        needRestart = true;
                     } else {
                         // container was killed by framework, possibly preempted
                         // we should re-try as the container was lost for some reason
@@ -575,10 +581,10 @@ public class JstormMaster {
                         jstormMasterContext.supervisorContainers.remove(supervisorMap.get(containerId));
                     }
 
-                } else {
+                }
+                if (needRestart == true) {
                     //if container over and wasn't killed by framework ,then resend ContainerRequest and launch it again
-                    jstormMasterContext.numCompletedContainers.incrementAndGet();
-                    LOG.info("process in this Container completed by itself, should restart." + ", containerId="
+                    LOG.info("process in this Container completed by itself, should restart " + ", containerId="
                             + containerStatus.getContainerId());
 
                     ContainerRequest containerAsk = null;
@@ -642,6 +648,7 @@ public class JstormMaster {
                 STARTType startType;
                 //todo: register every supervisor containers host
                 if (allocatedContainer.getPriority().getPriority() == 0) {
+                    LOG.info("received allocatedContainer for supervisor");
 
                     String supervisorHost = allocatedContainer.getNodeId().getHost();
                     startType = STARTType.SUPERVISOR;
@@ -668,6 +675,24 @@ public class JstormMaster {
 
                 } else {
                     startType = STARTType.NIMBUS;
+                    LOG.info("received allocatedContainer for nimbus");
+                    //allocated on the same node
+                    try {
+                        if (jstormMasterContext.nimbusHost.equalsIgnoreCase(allocatedContainer.getNodeId().getHost())) {
+                            LOG.warn("allocated new nimbus on the same node as current nimbus:" + jstormMasterContext.nimbusHost);
+                            amRMClient.releaseAssignedContainer(allocatedContainer.getId());
+                            jstormMasterContext.numAllocatedContainers.getAndDecrement();
+                            ContainerRequest request = jstormMasterContext.requestBlockingQueue.peek();
+                            removePreviousContainerRequest();
+                            if(request != null) {
+                                LOG.info("re-request nimbus");
+                                amHandler.startNimbus(1, request.getCapability().getMemory(), request.getCapability().getVirtualCores());
+                            }
+                            continue;
+                        }
+                    }catch(Exception e) {
+                        LOG.error(e);
+                    }
                     // set nimbusHost
                     jstormMasterContext.nimbusHost = allocatedContainer.getNodeId().getHost();
                     String path = RegistryUtils.serviceclassPath(
@@ -707,12 +732,16 @@ public class JstormMaster {
 
                 // need to remove container request when allocated,
                 // otherwise RM will continues allocate container over needs
-                if (!jstormMasterContext.requestBlockingQueue.isEmpty()) {
-                    try {
-                        amRMClient.removeContainerRequest(jstormMasterContext.requestBlockingQueue.take());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                removePreviousContainerRequest();
+            }
+        }
+
+        private void removePreviousContainerRequest() {
+            if (!jstormMasterContext.requestBlockingQueue.isEmpty()) {
+                try {
+                    amRMClient.removeContainerRequest(jstormMasterContext.requestBlockingQueue.take());
+                } catch (InterruptedException e) {
+                    LOG.warn("", e);
                 }
             }
         }
@@ -969,7 +998,7 @@ public class JstormMaster {
             try {
                 slotPortsStr = slotPortsView.getSupervisorSlotPorts(container.getResource().getMemory(),
                         container.getResource().getVirtualCores(), container.getNodeId().getHost());
-                if(slotPortsStr.isEmpty()){
+                if (slotPortsStr.isEmpty()) {
                     slotPortsStr = "*"; // to see what will happen
                 }
                 vargs.add(slotPortsStr);

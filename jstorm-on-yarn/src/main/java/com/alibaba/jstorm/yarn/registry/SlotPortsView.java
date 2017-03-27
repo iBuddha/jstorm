@@ -102,10 +102,10 @@ public class SlotPortsView {
             //scan port range from 9000 to 15000
             for (int i = getMinPort(); i < getMaxPort(); i++) {
                 if (JstormYarnUtils.isPortAvailable(supervisorHost, i)) {
-                    LOG.info("port " + i + "is available.");
+                    LOG.debug("port " + i + "is available.");
                     if (!hostUsedPorts.contains(String.valueOf(i))) {
                         reList.add(String.valueOf(i));
-                        LOG.info("add " + i + "to reList");
+                        LOG.debug("add " + i + "to reList");
                     }
                 }
                 if (reList.size() >= slotCount) {

@@ -126,6 +126,7 @@ public class NimbusServer {
             data = createNimbusData(conf, inimbus);
 
             initFollowerThread(conf);
+            LOG.info("initialed follower thread");
 
             int port = ConfigExtension.getNimbusDeamonHttpserverPort(conf);
             hs = new Httpserver(port, conf);
@@ -141,6 +142,7 @@ public class NimbusServer {
             }
             LOG.error("Fail to run nimbus ", e);
         } finally {
+            LOG.info("launchServer finished, call cleanup method");
             cleanup();
         }
 
@@ -317,7 +319,7 @@ public class NimbusServer {
 
         thriftServer = new THsHaServer(args);
 
-        LOG.info("Successfully started nimbus: started Thrift server...");
+        LOG.info("Successfully started nimbus: started Thrift server... port {}", thrift_port);
         thriftServer.serve();
     }
 
@@ -326,6 +328,7 @@ public class NimbusServer {
         Callback leaderCallback = new Callback() {
             public <T> Object execute(T... args) {
                 try {
+                    LOG.info("becoming leader");
                     init(data.getConf());
                 } catch (Exception e) {
                     LOG.error("Nimbus init error after becoming a leader", e);
@@ -344,6 +347,7 @@ public class NimbusServer {
     private void initShutdownHook() {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                LOG.warn("shutdown hook is called");
                 NimbusServer.this.cleanup();
             }
 

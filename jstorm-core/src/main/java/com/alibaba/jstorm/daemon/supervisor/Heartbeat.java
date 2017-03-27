@@ -249,11 +249,39 @@ class Heartbeat extends RunnableCallback {
         }
         portList.removeAll(usedList);
 
+        //ports maybe was used by other processes
+        List<Integer> portUsedByOtherApplications = new ArrayList<>();
+        for(int port : portList) {
+            boolean isAvailable = JStormServerUtils.isPortAvailable(myHostName, port);
+            if(!isAvailable) {
+                portUsedByOtherApplications.add(port);
+            }
+        }
+
         Collections.sort(portList);
+        if(portUsedByOtherApplications.size() > 0) {
+            portList.removeAll(portUsedByOtherApplications);
+            //find min port
+            int minPort = defaultPortList.get(0);
+            //find next available port
+            int mkupPortNum = portUsedByOtherApplications.size();
+             while(mkupPortNum > 0){
+                if(JStormServerUtils.isPortAvailable(myHostName, minPort)){
+                    portList.add(minPort);
+                    mkupPortNum --;
+                }
+                minPort ++;
+            }
+        }
+
         //Collections.sort(usedList);
 
         if (portNum >= portList.size()) {
-            return defaultPortList;
+//            return defaultPortList;
+            List<Integer> currentAvaPorts = new ArrayList<Integer>();
+            currentAvaPorts.addAll(portList);
+            currentAvaPorts.addAll(usedList);
+            return currentAvaPorts;
         } else {
             List<Integer> reportPortList = new ArrayList<Integer>();
             reportPortList.addAll(usedList);

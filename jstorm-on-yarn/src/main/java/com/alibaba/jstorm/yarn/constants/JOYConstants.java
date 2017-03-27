@@ -79,7 +79,7 @@ public class JOYConstants {
     public static final String FALSE = "false";
     public static final String SUPERVISOR = "supervisor";
     public static final String NIMBUS = "nimbus";
-    public static final Integer EXECUTOR_LOOP_TIME = 30 * 1000;
+//    public static final Integer EXECUTOR_LOOP_TIME = 30 * 1000;
 
     /**
      * yarn client

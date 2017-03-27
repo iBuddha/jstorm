@@ -618,7 +618,7 @@ public class ServiceHandler implements Iface, Shutdownable, DaemonCommon {
             String parent = PathUtils.parent_path(libName);
             PathUtils.local_mkdirs(parent);
             data.getUploaders().put(libName, Channels.newChannel(new FileOutputStream(libName)));
-            LOG.info("Begin upload file from client to " + libName);
+            LOG.info("Begin upload lib from client to " + libName);
         } catch (Exception e) {
             LOG.error("Fail to upload jar " + libName, e);
             throw new TException(e);
@@ -657,6 +657,7 @@ public class ServiceHandler implements Iface, Shutdownable, DaemonCommon {
      */
     @Override
     public void uploadChunk(String location, ByteBuffer chunk) throws TException {
+        LOG.info("uploadChunk is called for location: " + location);
         TimeCacheMap<Object, Object> uploaders = data.getUploaders();
         Object obj = uploaders.get(location);
         if (obj == null) {
@@ -665,7 +666,8 @@ public class ServiceHandler implements Iface, Shutdownable, DaemonCommon {
         try {
             if (obj instanceof WritableByteChannel) {
                 WritableByteChannel channel = (WritableByteChannel) obj;
-                channel.write(chunk);
+                int size = channel.write(chunk);
+                LOG.debug("wrote to " + location + " " + size + " bytes");
                 uploaders.put(location, channel);
             } else {
                 throw new TException("Object isn't WritableByteChannel for " + location);
@@ -680,6 +682,7 @@ public class ServiceHandler implements Iface, Shutdownable, DaemonCommon {
 
     @Override
     public void finishFileUpload(String location) throws TException {
+        LOG.info("finishFileUpload for " + location);
         TimeCacheMap<Object, Object> uploaders = data.getUploaders();
         Object obj = uploaders.get(location);
         if (obj == null) {

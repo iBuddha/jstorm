@@ -39,6 +39,7 @@ public class JstormAMHandler implements JstormAM.Iface {
 
     @Override
     public void addSupervisors(int number, int containerMemory, int containerVcores) throws TException {
+        LOG.info("request " + number + " new supervisors");
         if (containerMemory > jstormMasterContext.maxMemory) {
             containerMemory = jstormMasterContext.maxMemory;
         }
@@ -137,6 +138,7 @@ public class JstormAMHandler implements JstormAM.Iface {
 
     @Override
     public void startNimbus(int number, int containerMemory, int containerVirtualCores) throws TException {
+        LOG.info("request new Nimbus");
         //set priority to 1 which identity this container is allocated for nimbus
         String dstHost = "*";
         if (!jstormMasterContext.previousNimbusHost.equals("") && jstormMasterContext.nimbusContainers.size() == 0)

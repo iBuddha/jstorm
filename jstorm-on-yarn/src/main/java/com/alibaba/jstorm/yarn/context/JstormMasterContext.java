@@ -93,8 +93,8 @@ public class JstormMasterContext implements MasterContext {
 
     public String instanceName = "";
     public String nimbusDataDirPrefix = "";
-    public String nimbusHost = "";
-    public String previousNimbusHost = "";
+    public volatile String nimbusHost = "";
+    public volatile String previousNimbusHost = "";
 
     public String user = "";
     public String password = "";

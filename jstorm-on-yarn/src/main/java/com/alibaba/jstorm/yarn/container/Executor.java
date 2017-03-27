@@ -64,11 +64,16 @@ public class Executor {
      *
      * @return
      */
-    public boolean checkHeartBeat() {
+    public boolean checkHeartBeat() throws InterruptedException {
 
         String dataPath = executorMeta.getLocalDir();
         File localstate = new File(dataPath + "/data/" + startType + "/" + startType + ".heartbeat/");
         Long modefyTime = localstate.lastModified();
+//        if(modefyTime < componentStartTime && System.currentTimeMillis() - modefyTime > JOYConstants.EXECUTOR_HEARTBEAT_TIMEOUT)) {
+//            LOG.info("heartbeat file was modified before jvm-start-time, so waiting for process to startup");
+//            Thread.sleep(Math.max(0, componentStartTime + JOYConstants.EXECUTOR_HEARTBEAT_TIMEOUT - System.currentTimeMillis()));
+//            modefyTime = localstate.lastModified();
+//        }
 
         if (System.currentTimeMillis() - modefyTime > JOYConstants.EXECUTOR_HEARTBEAT_TIMEOUT) {
 
@@ -234,8 +239,8 @@ public class Executor {
             Process p = Runtime.getRuntime().exec(command.toString(),
                     new String[]{JOYConstants.CONTAINER_SUPERVISOR_HEARTBEAT + JOYConstants.EQUAL + executorMeta.getLocalDir() + JOYConstants.JSTORM_SUPERVISOR_HEARTBEAT_PATH,
                             JOYConstants.CONTAINER_NIMBUS_HEARTBEAT + JOYConstants.EQUAL + executorMeta.getLocalDir() + JOYConstants.JSTORM_NIMBUS_HEARTBEAT_PATH});
-            //wait 30 seconds
-            Thread.sleep(JOYConstants.EXECUTOR_LOOP_TIME);
+            //wait until first heartbeat should be write
+            Thread.sleep(JOYConstants.EXECUTOR_HEARTBEAT_TIMEOUT);
         } catch (Exception err) {
             err.printStackTrace();
         }
@@ -244,13 +249,19 @@ public class Executor {
     }
 
     public void waitRunning() {
+        int deadCount = 0;
         while (true) {
             try {
                 if (checkHeartBeat() && !needUpgrade()) {
                     Thread.sleep(3000);
                 } else {
                     killProcess();
-                    LOG.error(startType + " 's process is dead");
+                    LOG.error(startType + "'s process is dead");
+                    deadCount ++;
+                    if(deadCount > 10) {
+                        LOG.fatal(startType + "died too many times, abandon this container");
+                        throw new RuntimeException(startType + "died too many times, abandon this container");
+                    }
                     run();
                 }
             } catch (InterruptedException e) {

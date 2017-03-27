@@ -24,6 +24,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -49,6 +50,7 @@ public class NimbusClientManager {
 
     public static NimbusClient getNimbusClient(String clusterName) throws Exception {
         Map conf = UIUtils.readUiConfig();
+        LOG.info("UI configs are: " + Arrays.toString(conf.entrySet().toArray()));
         NimbusClient client = clientManager.get(clusterName);
         if (client != null) {
             try {
@@ -62,6 +64,7 @@ public class NimbusClientManager {
 
         if (client == null) {
             conf = UIUtils.resetZKConfig(conf, clusterName);
+            LOG.info("UI configs are: " + Arrays.toString(conf.entrySet().toArray()));
             client = NimbusClient.getConfiguredClient(conf);
             clientManager.put(clusterName, client);
         }

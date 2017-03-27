@@ -19,12 +19,10 @@ package com.alibaba.jstorm.daemon.supervisor;
 
 import com.alibaba.jstorm.client.ConfigExtension;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
+import com.alibaba.jstorm.utils.JStormServerUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
@@ -90,6 +88,9 @@ public class SupervisorInfo implements Serializable {
     public void setAvailableWorkerPorts(Set<Integer> workerPorts) {
         if (availableWorkerPorts == null)
             availableWorkerPorts = new HashSet<Integer>();
+
+//        availableWorkerPorts.addAll(workerPorts);
+        JStormServerUtils.replaceUnavilablePorts(hostName, availableWorkerPorts, 9000);
         availableWorkerPorts.addAll(workerPorts);
     }
 

@@ -328,7 +328,7 @@ def nimbus():
     cppaths = [JSTORM_CONF_DIR]
     nimbus_classpath = confvalue("nimbus.classpath", cppaths)
     nimbus_external_cp = get_external_classpath(confvalue("nimbus.external", cppaths))
-    childopts = confvalue("nimbus.childopts", cppaths) + get_server_childopts("nimbus")
+    childopts = confvalue("nimbus.childopts", cppaths) + get_server_childopts("nimbus-" + str(int(time.time())))
     exec_storm_class(
         "com.alibaba.jstorm.daemon.nimbus.NimbusServer",
         jvmtype="-server",
@@ -346,7 +346,7 @@ def supervisor():
     """
     cppaths = [JSTORM_CONF_DIR]
     supervisor_classpath = get_external_classpath(confvalue("supervisor.external", cppaths))
-    childopts = confvalue("supervisor.childopts", cppaths) + get_server_childopts("supervisor")
+    childopts = confvalue("supervisor.childopts", cppaths) + get_server_childopts("supervisor-" + str(int(time.time())))
     exec_storm_class(
         "com.alibaba.jstorm.daemon.supervisor.Supervisor",
         jvmtype="-server",

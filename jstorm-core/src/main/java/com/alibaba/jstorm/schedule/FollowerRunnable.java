@@ -100,6 +100,7 @@ public class FollowerRunnable implements Runnable {
         }
         try {
             if (!zkClusterState.leader_existed()) {
+                LOG.info("leader isn't existed, so try to be leader");
                 this.tryToBeLeader(data.getConf());
             }
         } catch (Exception e1) {
@@ -177,13 +178,16 @@ public class FollowerRunnable implements Runnable {
             try {
                 Thread.sleep(sleepTime);
                 if (!zkClusterState.leader_existed()) {
+                    LOG.info("leader isn't existed");
                     this.tryToBeLeader(data.getConf());
                     continue;
                 }
 
                 String master = zkClusterState.get_leader_host();
                 boolean isZkLeader = isLeader(master);
+                LOG.info("leader is {}", master);
                 if (isZkLeader) {
+                    LOG.info("this host is registered as leader ");
                     if (!data.isLeader()) {
                         zkClusterState.unregister_nimbus_host(hostPort);
                         zkClusterState.unregister_nimbus_detail(hostPort);
@@ -192,6 +196,7 @@ public class FollowerRunnable implements Runnable {
                     }
                     continue;
                 } else {
+                    LOG.info("this host is not zkLeader");
                     if (data.isLeader()) {
                         LOG.info("New ZK master is " + master);
                         JStormUtils.halt_process(1, "Lose ZK master node, halt process");
@@ -199,6 +204,7 @@ public class FollowerRunnable implements Runnable {
                     }
                 }
 
+                LOG.info("act as follower");
                 // here the nimbus is not leader
                 if (data.getBlobStore() instanceof LocalFsBlobStore){
                     blobSync();
@@ -209,8 +215,9 @@ public class FollowerRunnable implements Runnable {
                 // TODO Auto-generated catch block
                 continue;
             } catch (Exception e) {
+                LOG.error("", e);
                 if (state) {
-                    LOG.error("Unknow exception ", e);
+                    LOG.error("Unknown exception ", e);
                 }
             }
         }
@@ -242,6 +249,7 @@ public class FollowerRunnable implements Runnable {
 
 
     private void tryToBeLeader(final Map conf) throws Exception {
+        LOG.info("try to be leader");
         boolean allowed = check_nimbus_priority();
         
         if (allowed){

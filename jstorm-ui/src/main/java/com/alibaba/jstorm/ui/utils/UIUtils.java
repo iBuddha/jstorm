@@ -112,9 +112,11 @@ public class UIUtils {
                 if (clientConf != null) {
                     ret.putAll(clientConf);
                 }
+                LOG.info("client configs are: " + Arrays.toString(clientConf.entrySet().toArray()));
             } catch (FileNotFoundException e) {
             }
             if (!ret.containsKey(Config.NIMBUS_HOST)) {
+                LOG.warn("Nimbus Host is set to local");
                 ret.put(Config.NIMBUS_HOST, "localhost");
 
             }
